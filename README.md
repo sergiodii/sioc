@@ -1,6 +1,11 @@
-# SIOC - Simple Injection Of Control
+# sIOC - Simple Inversion of Control
 
-SIOC is a Go library that provides a simple dependency injection system.
+sIOC is a Go library that provides a simple dependency injection system.
+
+
+## Atual Version
+
+*package v0*
 
 ## Installation
 
