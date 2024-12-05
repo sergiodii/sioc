@@ -1,6 +1,6 @@
 package sioc
 
-import v0_injection "github.com/sergiodii/sIOC/v0"
+import v0_injection "github.com/sergiodii/sioc/v0"
 
 // Get returns an instance of type T from the dependency injection container.
 // If no instance of type T is found, it will panic with a fatal error.
