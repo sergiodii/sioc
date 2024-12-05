@@ -15,6 +15,7 @@ func Init() {
 }
 
 // Register registers an instance of type T in the dependency injection container.
+// It will panic if the instance is not a pointer.
 func Register[T any](instance T) {
-	v0_injection.Inject(instance)
+	v0_injection.Register(instance)
 }

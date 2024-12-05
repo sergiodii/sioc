@@ -47,7 +47,7 @@ func TestStartShouldInitializeInjector(t *testing.T) {
 func TestInjectShouldAddInstance(t *testing.T) {
 	v0_injection.Start()
 	testStruct := &TestStruct{Name: "test"}
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(testStruct)
 
 	if v0_injection.Len() != 1 {
 		t.Error("Expected one instance after Inject()")
@@ -58,7 +58,7 @@ func TestInjectShouldAddInstance(t *testing.T) {
 func TestGetShouldReturnInjectedInstance(t *testing.T) {
 	v0_injection.Start()
 	testStruct := &TestStruct{Name: "test"}
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(testStruct)
 	result := v0_injection.Get[*TestStruct]()
 	if result.Name != "test" {
 		t.Error("Expected to get injected instance")
@@ -69,7 +69,7 @@ func TestGetShouldReturnInjectedInstance(t *testing.T) {
 func TestInjectWithInjectorInterface(t *testing.T) {
 	v0_injection.Start()
 	testInjector := &TestInjector{}
-	v0_injection.Inject(testInjector)
+	v0_injection.Register(testInjector)
 
 	if v0_injection.Len() != 2 {
 		t.Error("Expected two instances after injecting IInjector, has: ", v0_injection.Len())
@@ -80,7 +80,7 @@ func TestInjectWithInjectorInterface(t *testing.T) {
 func TestGetInjectedFromInjector(t *testing.T) {
 	v0_injection.Start()
 	testInjector := &TestInjector{}
-	v0_injection.Inject(testInjector)
+	v0_injection.Register(testInjector)
 	result := v0_injection.Get[TestStruct]()
 	if result.Name != "injected" {
 		t.Error("Expected to get instance from IInjector")
@@ -90,7 +90,7 @@ func TestGetInjectedFromInjector(t *testing.T) {
 func TestInitShouldCallInitMethod(t *testing.T) {
 	v0_injection.Start()
 	testStruct := &TestStructWithInit{}
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(testStruct)
 	v0_injection.Init()
 	if !testStruct.Initialized {
 		t.Error("Expected Init() to be called")
@@ -100,7 +100,7 @@ func TestInitShouldCallInitMethod(t *testing.T) {
 func TestGetWithInterface(t *testing.T) {
 	v0_injection.Start()
 	testStruct := &TestStructWithInterface{Name: "interface"}
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(testStruct)
 	result := v0_injection.Get[ITestInterface]()
 	if result.GetName() != "interface" {
 		t.Error("Expected to get instance implementing interface")
@@ -159,7 +159,7 @@ func (t *TestStructWithMultipleDeps) Init(dep1 *TestStruct, dep2 ITestInterface)
 func TestInitWithNoDependencies(t *testing.T) {
 	v0_injection.Start()
 	testStruct := &TestStructWithInit{}
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(testStruct)
 	v0_injection.Init()
 	if !testStruct.Initialized {
 		t.Error("Expected Init() to be called without dependencies")
@@ -171,8 +171,8 @@ func TestInitWithOneDependency(t *testing.T) {
 	dep := &TestStruct{Name: "dependency"}
 	testStruct := &TestStructWithDependency{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(dep)
+	v0_injection.Register(testStruct)
 
 	v0_injection.Init()
 
@@ -190,9 +190,9 @@ func TestInitWithMultipleDependencies(t *testing.T) {
 	dep2 := &TestStructWithInterface{Name: "dep2"}
 	testStruct := &TestStructWithMultipleDeps{}
 
-	v0_injection.Inject(dep1)
-	v0_injection.Inject(dep2)
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(dep1)
+	v0_injection.Register(dep2)
+	v0_injection.Register(testStruct)
 
 	v0_injection.Init()
 
@@ -212,8 +212,8 @@ func TestInitOrder(t *testing.T) {
 	dep := &TestStructWithInit{}
 	testStruct := &TestStructWithInit{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(testStruct)
+	v0_injection.Register(dep)
+	v0_injection.Register(testStruct)
 
 	v0_injection.Init()
 
@@ -239,8 +239,8 @@ func TestValueChangeReflectsDependency1(t *testing.T) {
 	dep := &TestStructWithDependencyValue{Value: "initial-value"}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(dependent)
+	v0_injection.Register(dep)
+	v0_injection.Register(dependent)
 	v0_injection.Init()
 
 	dep.Value = "new-value"
@@ -254,8 +254,8 @@ func TestValueChangeReflectsDependency2(t *testing.T) {
 	dep := &TestStructWithDependencyValue{Value: "test1"}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(dependent)
+	v0_injection.Register(dep)
+	v0_injection.Register(dependent)
 	v0_injection.Init()
 
 	dep.Value = "test2"
@@ -271,9 +271,9 @@ func TestValueChangeReflectsDependency3(t *testing.T) {
 	dependent1 := &TestStructDependent{}
 	dependent2 := &TestStructDependent{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(dependent1)
-	v0_injection.Inject(dependent2)
+	v0_injection.Register(dep)
+	v0_injection.Register(dependent1)
+	v0_injection.Register(dependent2)
 	v0_injection.Init()
 
 	dep.Value = "xyz"
@@ -287,8 +287,8 @@ func TestValueChangeReflectsDependency4(t *testing.T) {
 	dep := &TestStructWithDependencyValue{Value: "initial"}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(dependent)
+	v0_injection.Register(dep)
+	v0_injection.Register(dependent)
 	v0_injection.Init()
 
 	originalValue := dep.Value
@@ -305,8 +305,8 @@ func TestValueChangeReflectsDependency5(t *testing.T) {
 	dep := &TestStructWithDependencyValue{Value: ""}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Inject(dep)
-	v0_injection.Inject(dependent)
+	v0_injection.Register(dep)
+	v0_injection.Register(dependent)
 	v0_injection.Init()
 
 	values := []string{"test1", "test2", "test3"}
@@ -335,9 +335,9 @@ func TestNewInstanceUsingNewInstanceTo(t *testing.T) {
 	depA := &TestStructWithDependencyValue{Value: "test"}
 	depB := &TestStructDependent{}
 
-	v0_injection.Inject(&TestNewInstance{})
-	v0_injection.Inject(depB)
-	v0_injection.Inject(depA)
+	v0_injection.Register(&TestNewInstance{})
+	v0_injection.Register(depB)
+	v0_injection.Register(depA)
 	v0_injection.Init()
 
 	testModule := v0_injection.Get[TestNewInstance]()
@@ -370,9 +370,9 @@ func TestNewInstanceUsingNewInstanceToB(t *testing.T) {
 	depA := &TestStructWithDependencyValue{Value: "test"}
 	depB := &TestStructWithDependencyValue{Value: "test"}
 
-	v0_injection.Inject(&TestNewInstanceTwo{})
-	v0_injection.Inject(depA)
-	v0_injection.Inject(depB)
+	v0_injection.Register(&TestNewInstanceTwo{})
+	v0_injection.Register(depA)
+	v0_injection.Register(depB)
 	v0_injection.Init()
 
 	testModule := v0_injection.Get[TestNewInstanceTwo]()

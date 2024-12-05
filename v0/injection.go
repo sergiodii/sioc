@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	// v0_injection "github.com/sergiodii/sioc/v0"
 )
 
 var injOnce sync.Once
@@ -64,10 +65,20 @@ func Len() int {
 	return len(inj.List)
 }
 
-func Inject(cls interface{}) {
+// Inject injects a class into the dependency injection container.
+// It will panic if the class is not a pointer.
+func Register(cls interface{}) {
 	Start()
+
+	fmt.Println("InitializeNewInstanceTo", reflect.TypeOf(InitializeNewInstanceTo("")).String())
+
+	if reflect.TypeOf(cls).Kind() != reflect.Ptr {
+		log.Fatalf("%s is not a pointer", reflect.TypeOf(cls).String())
+	}
+
 	injectInstance(cls)
 	injectFromIInjector(cls)
+
 }
 
 func injectInstance(cls interface{}) {
@@ -114,7 +125,7 @@ func buildDependencyMap() map[reflect.Type]*Injector[interface{}] {
 func initializeInjectors(dependencyMap map[reflect.Type]*Injector[interface{}]) {
 	for _, item := range inj.List {
 		initStart(item, dependencyMap)
-		fmt.Println("Offer Platform Handler: ", item.incjetionName, ", started")
+		fmt.Println("Injection: ", item.incjetionName, ", started")
 	}
 }
 
@@ -164,9 +175,9 @@ func prepareInitParams(inj *Injector[interface{}], initType reflect.Type, m map[
 }
 
 func handlePreKeyParam(paramType reflect.Type, i int, initType reflect.Type, params []reflect.Value) bool {
-	preKeyName := "offers_platform_core_injection.InitializeNewInstanceTo"
-	isPreKey := paramType.String() == preKeyName
-	isNewInstance := (i != 0) && initType.In(i-1).String() == preKeyName
+	preKeyType := reflect.TypeOf(InitializeNewInstanceTo(""))
+	isPreKey := paramType == preKeyType
+	isNewInstance := (i != 0) && initType.In(i-1) == preKeyType
 
 	if isPreKey && !isNewInstance {
 		n := InitializeNewInstanceTo(NEW)
