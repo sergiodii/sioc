@@ -3,7 +3,7 @@ package v1_container
 import (
 	"sync"
 
-	v1_utils "github.com/sergiodii/sIOC/v1/utils"
+	v1_utils "github.com/sergiodii/sioc/v1/utils"
 )
 
 type Container interface {

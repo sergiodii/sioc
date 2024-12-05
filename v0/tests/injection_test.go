@@ -1,9 +1,10 @@
-package offers_platform_core_injection_test
+package v0_injection_test
 
 import (
-	offers_platform_core_injection "marketing-api/internal/offers_platform/core/injection"
 	"os"
 	"testing"
+
+	v0_injection "github.com/sergiodii/sioc/v0"
 )
 
 type TestStruct struct {
@@ -37,70 +38,70 @@ func (t *TestStructWithInterface) GetName() string {
 }
 
 func TestStartShouldInitializeInjector(t *testing.T) {
-	offers_platform_core_injection.Start()
-	if offers_platform_core_injection.Len() != 0 {
+	v0_injection.Start()
+	if v0_injection.Len() != 0 {
 		t.Error("Expected empty injector after Start()")
 	}
 }
 
 func TestInjectShouldAddInstance(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testStruct := &TestStruct{Name: "test"}
-	offers_platform_core_injection.Inject(testStruct)
+	v0_injection.Inject(testStruct)
 
-	if offers_platform_core_injection.Len() != 1 {
+	if v0_injection.Len() != 1 {
 		t.Error("Expected one instance after Inject()")
 	}
-	offers_platform_core_injection.ClearList()
+	v0_injection.ClearList()
 }
 
 func TestGetShouldReturnInjectedInstance(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testStruct := &TestStruct{Name: "test"}
-	offers_platform_core_injection.Inject(testStruct)
-	result := offers_platform_core_injection.Get[*TestStruct]()
+	v0_injection.Inject(testStruct)
+	result := v0_injection.Get[*TestStruct]()
 	if result.Name != "test" {
 		t.Error("Expected to get injected instance")
 	}
-	offers_platform_core_injection.ClearList()
+	v0_injection.ClearList()
 }
 
 func TestInjectWithInjectorInterface(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testInjector := &TestInjector{}
-	offers_platform_core_injection.Inject(testInjector)
+	v0_injection.Inject(testInjector)
 
-	if offers_platform_core_injection.Len() != 2 {
-		t.Error("Expected two instances after injecting IInjector, has: ", offers_platform_core_injection.Len())
+	if v0_injection.Len() != 2 {
+		t.Error("Expected two instances after injecting IInjector, has: ", v0_injection.Len())
 	}
-	offers_platform_core_injection.ClearList()
+	v0_injection.ClearList()
 }
 
 func TestGetInjectedFromInjector(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testInjector := &TestInjector{}
-	offers_platform_core_injection.Inject(testInjector)
-	result := offers_platform_core_injection.Get[TestStruct]()
+	v0_injection.Inject(testInjector)
+	result := v0_injection.Get[TestStruct]()
 	if result.Name != "injected" {
 		t.Error("Expected to get instance from IInjector")
 	}
 }
 
 func TestInitShouldCallInitMethod(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testStruct := &TestStructWithInit{}
-	offers_platform_core_injection.Inject(testStruct)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(testStruct)
+	v0_injection.Init()
 	if !testStruct.Initialized {
 		t.Error("Expected Init() to be called")
 	}
 }
 
 func TestGetWithInterface(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testStruct := &TestStructWithInterface{Name: "interface"}
-	offers_platform_core_injection.Inject(testStruct)
-	result := offers_platform_core_injection.Get[ITestInterface]()
+	v0_injection.Inject(testStruct)
+	result := v0_injection.Get[ITestInterface]()
 	if result.GetName() != "interface" {
 		t.Error("Expected to get instance implementing interface")
 	}
@@ -108,23 +109,23 @@ func TestGetWithInterface(t *testing.T) {
 
 func TestGetFunctionName(t *testing.T) {
 	testFunc := func() {}
-	name := offers_platform_core_injection.GetFunctionName(testFunc)
+	name := v0_injection.GetFunctionName(testFunc)
 	if name == "" {
 		t.Error("Expected non-empty function name")
 	}
 }
 
 func TestInjectorMatchWithName(t *testing.T) {
-	injector := offers_platform_core_injection.NewInjector[interface{}]()
+	injector := v0_injection.NewInjector[interface{}]()
 	testStruct := &TestStruct{}
 	injector.AddInstance(testStruct)
-	if !injector.MatchWithName("*offers_platform_core_injection_test.TestStruct") {
+	if !injector.MatchWithName("*v0_injection_test.TestStruct") {
 		t.Error("Expected injector to match with type name")
 	}
 }
 
 func TestGetInstanceFromInjector(t *testing.T) {
-	injector := offers_platform_core_injection.NewInjector[interface{}]()
+	injector := v0_injection.NewInjector[interface{}]()
 	testStruct := &TestStruct{Name: "test"}
 	injector.AddInstance(testStruct)
 	result := injector.GetInstance()
@@ -156,24 +157,24 @@ func (t *TestStructWithMultipleDeps) Init(dep1 *TestStruct, dep2 ITestInterface)
 }
 
 func TestInitWithNoDependencies(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	testStruct := &TestStructWithInit{}
-	offers_platform_core_injection.Inject(testStruct)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(testStruct)
+	v0_injection.Init()
 	if !testStruct.Initialized {
 		t.Error("Expected Init() to be called without dependencies")
 	}
 }
 
 func TestInitWithOneDependency(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStruct{Name: "dependency"}
 	testStruct := &TestStructWithDependency{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(testStruct)
+	v0_injection.Inject(dep)
+	v0_injection.Inject(testStruct)
 
-	offers_platform_core_injection.Init()
+	v0_injection.Init()
 
 	if !testStruct.initialized {
 		t.Error("Expected Init() to be called")
@@ -184,16 +185,16 @@ func TestInitWithOneDependency(t *testing.T) {
 }
 
 func TestInitWithMultipleDependencies(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep1 := &TestStruct{Name: "dep1"}
 	dep2 := &TestStructWithInterface{Name: "dep2"}
 	testStruct := &TestStructWithMultipleDeps{}
 
-	offers_platform_core_injection.Inject(dep1)
-	offers_platform_core_injection.Inject(dep2)
-	offers_platform_core_injection.Inject(testStruct)
+	v0_injection.Inject(dep1)
+	v0_injection.Inject(dep2)
+	v0_injection.Inject(testStruct)
 
-	offers_platform_core_injection.Init()
+	v0_injection.Init()
 
 	if !testStruct.initialized {
 		t.Error("Expected Init() to be called")
@@ -207,14 +208,14 @@ func TestInitWithMultipleDependencies(t *testing.T) {
 }
 
 func TestInitOrder(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStructWithInit{}
 	testStruct := &TestStructWithInit{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(testStruct)
+	v0_injection.Inject(dep)
+	v0_injection.Inject(testStruct)
 
-	offers_platform_core_injection.Init()
+	v0_injection.Init()
 
 	if !dep.Initialized || !testStruct.Initialized {
 		t.Error("Expected both structures to be initialized")
@@ -234,13 +235,13 @@ func (t *TestStructDependent) Init(depNew *TestStructWithDependencyValue) {
 }
 
 func TestValueChangeReflectsDependency1(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStructWithDependencyValue{Value: "initial-value"}
 	dependent := &TestStructDependent{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(dependent)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(dep)
+	v0_injection.Inject(dependent)
+	v0_injection.Init()
 
 	dep.Value = "new-value"
 	if dependent.Dep.Value != "new-value" {
@@ -249,13 +250,13 @@ func TestValueChangeReflectsDependency1(t *testing.T) {
 }
 
 func TestValueChangeReflectsDependency2(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStructWithDependencyValue{Value: "test1"}
 	dependent := &TestStructDependent{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(dependent)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(dep)
+	v0_injection.Inject(dependent)
+	v0_injection.Init()
 
 	dep.Value = "test2"
 	if dependent.Dep.Value != dep.Value {
@@ -265,15 +266,15 @@ func TestValueChangeReflectsDependency2(t *testing.T) {
 
 func TestValueChangeReflectsDependency3(t *testing.T) {
 	os.Setenv("NODE_ENV", "test")
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStructWithDependencyValue{Value: "abc"}
 	dependent1 := &TestStructDependent{}
 	dependent2 := &TestStructDependent{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(dependent1)
-	offers_platform_core_injection.Inject(dependent2)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(dep)
+	v0_injection.Inject(dependent1)
+	v0_injection.Inject(dependent2)
+	v0_injection.Init()
 
 	dep.Value = "xyz"
 	if dependent1.Dep.Value != "xyz" || dependent2.Dep.Value != "xyz" {
@@ -282,13 +283,13 @@ func TestValueChangeReflectsDependency3(t *testing.T) {
 }
 
 func TestValueChangeReflectsDependency4(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStructWithDependencyValue{Value: "initial"}
 	dependent := &TestStructDependent{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(dependent)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(dep)
+	v0_injection.Inject(dependent)
+	v0_injection.Init()
 
 	originalValue := dep.Value
 	dep.Value = "modified"
@@ -300,13 +301,13 @@ func TestValueChangeReflectsDependency4(t *testing.T) {
 }
 
 func TestValueChangeReflectsDependency5(t *testing.T) {
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	dep := &TestStructWithDependencyValue{Value: ""}
 	dependent := &TestStructDependent{}
 
-	offers_platform_core_injection.Inject(dep)
-	offers_platform_core_injection.Inject(dependent)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(dep)
+	v0_injection.Inject(dependent)
+	v0_injection.Init()
 
 	values := []string{"test1", "test2", "test3"}
 	for _, value := range values {
@@ -322,7 +323,7 @@ type TestNewInstance struct {
 	a           *TestStructWithDependencyValue
 }
 
-func (t *TestNewInstance) Init(_ offers_platform_core_injection.InitializeNewInstanceTo, a *TestStructWithDependencyValue) {
+func (t *TestNewInstance) Init(_ v0_injection.InitializeNewInstanceTo, a *TestStructWithDependencyValue) {
 	t.Initialized = true
 	t.a = a
 	a.Value = "new value"
@@ -330,16 +331,16 @@ func (t *TestNewInstance) Init(_ offers_platform_core_injection.InitializeNewIns
 
 func TestNewInstanceUsingNewInstanceTo(t *testing.T) {
 	os.Setenv("NODE_ENV", "test")
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	depA := &TestStructWithDependencyValue{Value: "test"}
 	depB := &TestStructDependent{}
 
-	offers_platform_core_injection.Inject(&TestNewInstance{})
-	offers_platform_core_injection.Inject(depB)
-	offers_platform_core_injection.Inject(depA)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(&TestNewInstance{})
+	v0_injection.Inject(depB)
+	v0_injection.Inject(depA)
+	v0_injection.Init()
 
-	testModule := offers_platform_core_injection.Get[TestNewInstance]()
+	testModule := v0_injection.Get[TestNewInstance]()
 
 	if !testModule.Initialized {
 		t.Error("Expected module to be initialized")
@@ -356,7 +357,7 @@ type TestNewInstanceTwo struct {
 	b           *TestStructWithDependencyValue
 }
 
-func (t *TestNewInstanceTwo) Init(a *TestStructWithDependencyValue, _ offers_platform_core_injection.InitializeNewInstanceTo, b *TestStructWithDependencyValue) {
+func (t *TestNewInstanceTwo) Init(a *TestStructWithDependencyValue, _ v0_injection.InitializeNewInstanceTo, b *TestStructWithDependencyValue) {
 	t.Initialized = true
 	t.a = a
 	t.b = b
@@ -365,16 +366,16 @@ func (t *TestNewInstanceTwo) Init(a *TestStructWithDependencyValue, _ offers_pla
 
 func TestNewInstanceUsingNewInstanceToB(t *testing.T) {
 	os.Setenv("NODE_ENV", "test")
-	offers_platform_core_injection.Start()
+	v0_injection.Start()
 	depA := &TestStructWithDependencyValue{Value: "test"}
 	depB := &TestStructWithDependencyValue{Value: "test"}
 
-	offers_platform_core_injection.Inject(&TestNewInstanceTwo{})
-	offers_platform_core_injection.Inject(depA)
-	offers_platform_core_injection.Inject(depB)
-	offers_platform_core_injection.Init()
+	v0_injection.Inject(&TestNewInstanceTwo{})
+	v0_injection.Inject(depA)
+	v0_injection.Inject(depB)
+	v0_injection.Init()
 
-	testModule := offers_platform_core_injection.Get[TestNewInstanceTwo]()
+	testModule := v0_injection.Get[TestNewInstanceTwo]()
 
 	if !testModule.Initialized {
 		t.Error("Expected module to be initialized")

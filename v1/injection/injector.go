@@ -3,8 +3,8 @@ package v1_injection
 import (
 	"reflect"
 
-	v1_interfaces "github.com/sergiodii/sIOC/v1/interfaces"
-	v1_utils "github.com/sergiodii/sIOC/v1/utils"
+	v1_interfaces "github.com/sergiodii/sioc/v1/interfaces"
+	v1_utils "github.com/sergiodii/sioc/v1/utils"
 )
 
 type Injector[T any] struct {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	v1_container "github.com/sergiodii/sIOC/v1/container"
-	v1_injection "github.com/sergiodii/sIOC/v1/injection"
+	v1_container "github.com/sergiodii/sioc/v1/container"
+	v1_injection "github.com/sergiodii/sioc/v1/injection"
 )
 
 type TestStruct struct {

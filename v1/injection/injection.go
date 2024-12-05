@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"strings"
 
-	v1_container "github.com/sergiodii/sIOC/v1/container"
-	v1_interfaces "github.com/sergiodii/sIOC/v1/interfaces"
+	v1_container "github.com/sergiodii/sioc/v1/container"
+	v1_interfaces "github.com/sergiodii/sioc/v1/interfaces"
 )
 
 func Get[T any](container v1_container.Container) T {
