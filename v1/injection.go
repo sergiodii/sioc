@@ -1,4 +1,4 @@
-package v1_injection
+package sioc
 
 import (
 	"fmt"
@@ -6,18 +6,15 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
-
-	v1_container "github.com/sergiodii/sioc/v1/container"
-	v1_interfaces "github.com/sergiodii/sioc/v1/interfaces"
 )
 
-func Get[T any](container v1_container.Container) T {
+func Get[T any](container Container) T {
 	typeT := reflect.TypeOf((*T)(nil))
 	instance, ok := container.Get(typeT.String())
-	s := typeT.String()
-	fmt.Println(s)
+	// s := typeT.String()
+	// fmt.Println(s)
 	if ok {
-		r := instance.(v1_interfaces.Injector[*T]).GetInstance()
+		r := instance.(Injector[*T]).GetInstance()
 		return *r
 	}
 
@@ -27,21 +24,21 @@ func Get[T any](container v1_container.Container) T {
 
 		// Verifica se o tipo é uma interface
 		if typeT.Kind() == reflect.Interface {
-			if reflect.TypeOf(item.(v1_interfaces.Injector[T]).GetInstance()).Implements(typeT) {
-				return item.(v1_interfaces.Injector[T]).GetInstance()
+			if reflect.TypeOf(item.(Injector[T]).GetInstance()).Implements(typeT) {
+				return item.(Injector[T]).GetInstance()
 			}
 			continue
 		}
 
 		// Verifica se o tipo é um ponteiro
 		if typeT.Kind() == reflect.Ptr {
-			if item.(v1_interfaces.Injector[T]).MatchWithName(typeT.String()) {
-				return item.(v1_interfaces.Injector[T]).GetInstance()
+			if item.(Injector[T]).MatchWithName(typeT.String()) {
+				return item.(Injector[T]).GetInstance()
 			}
 		} else {
 			// Para tipos não ponteiros, verifica o tipo base
-			if item.(v1_interfaces.Injector[T]).MatchWithName("*" + typeT.String()) {
-				return *item.(v1_interfaces.Injector[*T]).GetInstance()
+			if item.(Injector[T]).MatchWithName("*" + typeT.String()) {
+				return *item.(Injector[*T]).GetInstance()
 			}
 		}
 	}
@@ -51,7 +48,7 @@ func Get[T any](container v1_container.Container) T {
 	return empty
 }
 
-func Inject(cls interface{}, container v1_container.Container) {
+func Inject(cls interface{}, container Container) {
 
 	newInj := NewInjector[interface{}]()
 
@@ -68,16 +65,16 @@ func GetFunctionName(temp interface{}) string {
 	return strs[len(strs)-1]
 }
 
-func Init(container v1_container.Container) {
+func Init(container Container) {
 
 	// First step: Map all required dependencies
-	dependencyMap := make(map[reflect.Type]v1_interfaces.Injector[interface{}])
+	dependencyMap := make(map[reflect.Type]Injector[interface{}])
 	for _, item := range container.GetAll() {
-		dependencyMap[reflect.TypeOf(item.(v1_interfaces.Injector[interface{}]).GetInstance())] = item.(v1_interfaces.Injector[interface{}])
+		dependencyMap[reflect.TypeOf(item.(Injector[interface{}]).GetInstance())] = item.(Injector[interface{}])
 	}
 
 	for _, item := range container.GetAll() {
-		instance := item.(v1_interfaces.Injector[interface{}]).GetInstance()
+		instance := item.(Injector[interface{}]).GetInstance()
 		init := reflect.ValueOf(instance).MethodByName("Init")
 
 		if init.IsValid() {

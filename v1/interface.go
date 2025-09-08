@@ -1,4 +1,4 @@
-package v1_interfaces
+package sioc
 
 type InjectorInsertion interface {
 	InjectorInsertion() any

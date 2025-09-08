@@ -1,4 +1,4 @@
-package v0_injection
+package sioc
 
 type IInjector interface {
 	InjectorInsertion() any

@@ -1,4 +1,4 @@
-package v1_injection
+package sioc
 
 type InitializeNewInstanceTo string
 

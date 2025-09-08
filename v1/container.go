@@ -1,9 +1,9 @@
-package v1_container
+package sioc
 
 import (
 	"sync"
 
-	v1_utils "github.com/sergiodii/sioc/v1/utils"
+	"github.com/sergiodii/sioc/extension/text"
 )
 
 type Container interface {
@@ -22,11 +22,11 @@ func New() Container {
 }
 
 func (c *container) Set(instanceType string, instance any) {
-	c.mapList.Store(v1_utils.SanitizeName(instanceType), instance)
+	c.mapList.Store(text.Sanitize(instanceType), instance)
 }
 
 func (c *container) Get(instanceType string) (any, bool) {
-	return c.mapList.Load(v1_utils.SanitizeName(instanceType))
+	return c.mapList.Load(text.Sanitize(instanceType))
 }
 
 func (c *container) GetAll() []any {

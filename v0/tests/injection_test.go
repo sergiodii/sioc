@@ -1,10 +1,10 @@
-package v0_injection_test
+package sioc_test
 
 import (
 	"os"
 	"testing"
 
-	v0_injection "github.com/sergiodii/sioc/v0"
+	"github.com/sergiodii/sioc/v0"
 )
 
 type TestStruct struct {
@@ -38,70 +38,70 @@ func (t *TestStructWithInterface) GetName() string {
 }
 
 func TestStartShouldInitializeInjector(t *testing.T) {
-	v0_injection.Start()
-	if v0_injection.Len() != 0 {
+	sioc.Start()
+	if sioc.Len() != 0 {
 		t.Error("Expected empty injector after Start()")
 	}
 }
 
 func TestInjectShouldAddInstance(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testStruct := &TestStruct{Name: "test"}
-	v0_injection.Register(testStruct)
+	sioc.Register(testStruct)
 
-	if v0_injection.Len() != 1 {
+	if sioc.Len() != 1 {
 		t.Error("Expected one instance after Inject()")
 	}
-	v0_injection.ClearList()
+	sioc.ClearList()
 }
 
 func TestGetShouldReturnInjectedInstance(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testStruct := &TestStruct{Name: "test"}
-	v0_injection.Register(testStruct)
-	result := v0_injection.Get[*TestStruct]()
+	sioc.Register(testStruct)
+	result := sioc.Get[*TestStruct]()
 	if result.Name != "test" {
 		t.Error("Expected to get injected instance")
 	}
-	v0_injection.ClearList()
+	sioc.ClearList()
 }
 
 func TestInjectWithInjectorInterface(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testInjector := &TestInjector{}
-	v0_injection.Register(testInjector)
+	sioc.Register(testInjector)
 
-	if v0_injection.Len() != 2 {
-		t.Error("Expected two instances after injecting IInjector, has: ", v0_injection.Len())
+	if sioc.Len() != 2 {
+		t.Error("Expected two instances after injecting IInjector, has: ", sioc.Len())
 	}
-	v0_injection.ClearList()
+	sioc.ClearList()
 }
 
 func TestGetInjectedFromInjector(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testInjector := &TestInjector{}
-	v0_injection.Register(testInjector)
-	result := v0_injection.Get[TestStruct]()
+	sioc.Register(testInjector)
+	result := sioc.Get[TestStruct]()
 	if result.Name != "injected" {
 		t.Error("Expected to get instance from IInjector")
 	}
 }
 
 func TestInitShouldCallInitMethod(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testStruct := &TestStructWithInit{}
-	v0_injection.Register(testStruct)
-	v0_injection.Init()
+	sioc.Register(testStruct)
+	sioc.Init()
 	if !testStruct.Initialized {
 		t.Error("Expected Init() to be called")
 	}
 }
 
 func TestGetWithInterface(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testStruct := &TestStructWithInterface{Name: "interface"}
-	v0_injection.Register(testStruct)
-	result := v0_injection.Get[ITestInterface]()
+	sioc.Register(testStruct)
+	result := sioc.Get[ITestInterface]()
 	if result.GetName() != "interface" {
 		t.Error("Expected to get instance implementing interface")
 	}
@@ -109,23 +109,23 @@ func TestGetWithInterface(t *testing.T) {
 
 func TestGetFunctionName(t *testing.T) {
 	testFunc := func() {}
-	name := v0_injection.GetFunctionName(testFunc)
+	name := sioc.GetFunctionName(testFunc)
 	if name == "" {
 		t.Error("Expected non-empty function name")
 	}
 }
 
 func TestInjectorMatchWithName(t *testing.T) {
-	injector := v0_injection.NewInjector[interface{}]()
+	injector := sioc.NewInjector[interface{}]()
 	testStruct := &TestStruct{}
 	injector.AddInstance(testStruct)
-	if !injector.MatchWithName("*v0_injection_test.TestStruct") {
+	if !injector.MatchWithName("*sioc_test.TestStruct") {
 		t.Error("Expected injector to match with type name")
 	}
 }
 
 func TestGetInstanceFromInjector(t *testing.T) {
-	injector := v0_injection.NewInjector[interface{}]()
+	injector := sioc.NewInjector[interface{}]()
 	testStruct := &TestStruct{Name: "test"}
 	injector.AddInstance(testStruct)
 	result := injector.GetInstance()
@@ -157,24 +157,24 @@ func (t *TestStructWithMultipleDeps) Init(dep1 *TestStruct, dep2 ITestInterface)
 }
 
 func TestInitWithNoDependencies(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	testStruct := &TestStructWithInit{}
-	v0_injection.Register(testStruct)
-	v0_injection.Init()
+	sioc.Register(testStruct)
+	sioc.Init()
 	if !testStruct.Initialized {
 		t.Error("Expected Init() to be called without dependencies")
 	}
 }
 
 func TestInitWithOneDependency(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStruct{Name: "dependency"}
 	testStruct := &TestStructWithDependency{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(testStruct)
+	sioc.Register(dep)
+	sioc.Register(testStruct)
 
-	v0_injection.Init()
+	sioc.Init()
 
 	if !testStruct.initialized {
 		t.Error("Expected Init() to be called")
@@ -185,16 +185,16 @@ func TestInitWithOneDependency(t *testing.T) {
 }
 
 func TestInitWithMultipleDependencies(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep1 := &TestStruct{Name: "dep1"}
 	dep2 := &TestStructWithInterface{Name: "dep2"}
 	testStruct := &TestStructWithMultipleDeps{}
 
-	v0_injection.Register(dep1)
-	v0_injection.Register(dep2)
-	v0_injection.Register(testStruct)
+	sioc.Register(dep1)
+	sioc.Register(dep2)
+	sioc.Register(testStruct)
 
-	v0_injection.Init()
+	sioc.Init()
 
 	if !testStruct.initialized {
 		t.Error("Expected Init() to be called")
@@ -208,14 +208,14 @@ func TestInitWithMultipleDependencies(t *testing.T) {
 }
 
 func TestInitOrder(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStructWithInit{}
 	testStruct := &TestStructWithInit{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(testStruct)
+	sioc.Register(dep)
+	sioc.Register(testStruct)
 
-	v0_injection.Init()
+	sioc.Init()
 
 	if !dep.Initialized || !testStruct.Initialized {
 		t.Error("Expected both structures to be initialized")
@@ -235,13 +235,13 @@ func (t *TestStructDependent) Init(depNew *TestStructWithDependencyValue) {
 }
 
 func TestValueChangeReflectsDependency1(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStructWithDependencyValue{Value: "initial-value"}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(dependent)
-	v0_injection.Init()
+	sioc.Register(dep)
+	sioc.Register(dependent)
+	sioc.Init()
 
 	dep.Value = "new-value"
 	if dependent.Dep.Value != "new-value" {
@@ -250,13 +250,13 @@ func TestValueChangeReflectsDependency1(t *testing.T) {
 }
 
 func TestValueChangeReflectsDependency2(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStructWithDependencyValue{Value: "test1"}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(dependent)
-	v0_injection.Init()
+	sioc.Register(dep)
+	sioc.Register(dependent)
+	sioc.Init()
 
 	dep.Value = "test2"
 	if dependent.Dep.Value != dep.Value {
@@ -266,15 +266,15 @@ func TestValueChangeReflectsDependency2(t *testing.T) {
 
 func TestValueChangeReflectsDependency3(t *testing.T) {
 	os.Setenv("NODE_ENV", "test")
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStructWithDependencyValue{Value: "abc"}
 	dependent1 := &TestStructDependent{}
 	dependent2 := &TestStructDependent{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(dependent1)
-	v0_injection.Register(dependent2)
-	v0_injection.Init()
+	sioc.Register(dep)
+	sioc.Register(dependent1)
+	sioc.Register(dependent2)
+	sioc.Init()
 
 	dep.Value = "xyz"
 	if dependent1.Dep.Value != "xyz" || dependent2.Dep.Value != "xyz" {
@@ -283,13 +283,13 @@ func TestValueChangeReflectsDependency3(t *testing.T) {
 }
 
 func TestValueChangeReflectsDependency4(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStructWithDependencyValue{Value: "initial"}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(dependent)
-	v0_injection.Init()
+	sioc.Register(dep)
+	sioc.Register(dependent)
+	sioc.Init()
 
 	originalValue := dep.Value
 	dep.Value = "modified"
@@ -301,13 +301,13 @@ func TestValueChangeReflectsDependency4(t *testing.T) {
 }
 
 func TestValueChangeReflectsDependency5(t *testing.T) {
-	v0_injection.Start()
+	sioc.Start()
 	dep := &TestStructWithDependencyValue{Value: ""}
 	dependent := &TestStructDependent{}
 
-	v0_injection.Register(dep)
-	v0_injection.Register(dependent)
-	v0_injection.Init()
+	sioc.Register(dep)
+	sioc.Register(dependent)
+	sioc.Init()
 
 	values := []string{"test1", "test2", "test3"}
 	for _, value := range values {
@@ -323,7 +323,7 @@ type TestNewInstance struct {
 	a           *TestStructWithDependencyValue
 }
 
-func (t *TestNewInstance) Init(_ v0_injection.InitializeNewInstanceTo, a *TestStructWithDependencyValue) {
+func (t *TestNewInstance) Init(_ sioc.InitializeNewInstanceTo, a *TestStructWithDependencyValue) {
 	t.Initialized = true
 	t.a = a
 	a.Value = "new value"
@@ -331,16 +331,16 @@ func (t *TestNewInstance) Init(_ v0_injection.InitializeNewInstanceTo, a *TestSt
 
 func TestNewInstanceUsingNewInstanceTo(t *testing.T) {
 	os.Setenv("NODE_ENV", "test")
-	v0_injection.Start()
+	sioc.Start()
 	depA := &TestStructWithDependencyValue{Value: "test"}
 	depB := &TestStructDependent{}
 
-	v0_injection.Register(&TestNewInstance{})
-	v0_injection.Register(depB)
-	v0_injection.Register(depA)
-	v0_injection.Init()
+	sioc.Register(&TestNewInstance{})
+	sioc.Register(depB)
+	sioc.Register(depA)
+	sioc.Init()
 
-	testModule := v0_injection.Get[TestNewInstance]()
+	testModule := sioc.Get[TestNewInstance]()
 
 	if !testModule.Initialized {
 		t.Error("Expected module to be initialized")
@@ -357,7 +357,7 @@ type TestNewInstanceTwo struct {
 	b           *TestStructWithDependencyValue
 }
 
-func (t *TestNewInstanceTwo) Init(a *TestStructWithDependencyValue, _ v0_injection.InitializeNewInstanceTo, b *TestStructWithDependencyValue) {
+func (t *TestNewInstanceTwo) Init(a *TestStructWithDependencyValue, _ sioc.InitializeNewInstanceTo, b *TestStructWithDependencyValue) {
 	t.Initialized = true
 	t.a = a
 	t.b = b
@@ -366,16 +366,16 @@ func (t *TestNewInstanceTwo) Init(a *TestStructWithDependencyValue, _ v0_injecti
 
 func TestNewInstanceUsingNewInstanceToB(t *testing.T) {
 	os.Setenv("NODE_ENV", "test")
-	v0_injection.Start()
+	sioc.Start()
 	depA := &TestStructWithDependencyValue{Value: "test"}
 	depB := &TestStructWithDependencyValue{Value: "test"}
 
-	v0_injection.Register(&TestNewInstanceTwo{})
-	v0_injection.Register(depA)
-	v0_injection.Register(depB)
-	v0_injection.Init()
+	sioc.Register(&TestNewInstanceTwo{})
+	sioc.Register(depA)
+	sioc.Register(depB)
+	sioc.Init()
 
-	testModule := v0_injection.Get[TestNewInstanceTwo]()
+	testModule := sioc.Get[TestNewInstanceTwo]()
 
 	if !testModule.Initialized {
 		t.Error("Expected module to be initialized")
