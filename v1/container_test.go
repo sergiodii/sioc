@@ -104,26 +104,26 @@ func TestServiceRegistryBackwardCompatibility(t *testing.T) {
 	registry := container.(*serviceRegistry)
 
 	// Test set
-	registry.set("key1", "value1")
+	registry.Register("key1", "value1")
 
 	// Test get
-	value, found := registry.get("key1")
+	value, found := registry.Resolve("key1")
 	if !found || value != "value1" {
 		t.Errorf("Expected 'value1', got %v (found: %t)", value, found)
 	}
 
 	// Test with multiple values
-	registry.set("key2", "value2")
+	registry.Register("key2", "value2")
 
 	// Test getAll
-	all := registry.getAll()
+	all := registry.ListAll()
 	if len(all) != 2 {
 		t.Errorf("Expected 2 items, got %d", len(all))
 	}
 
 	// Test len
-	if registry.len() != 2 {
-		t.Errorf("Expected length 2, got %d", registry.len())
+	if registry.Count() != 2 {
+		t.Errorf("Expected length 2, got %d", registry.Count())
 	}
 }
 

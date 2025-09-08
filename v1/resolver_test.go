@@ -79,10 +79,10 @@ func TestContainerBackwardCompatibility(t *testing.T) {
 	concreteContainer := container.(*serviceRegistry)
 
 	// Test old set method
-	concreteContainer.set("test_key", testValue)
+	concreteContainer.Register("test_key", testValue)
 
 	// Test old get method
-	resolved, found := concreteContainer.get("test_key")
+	resolved, found := concreteContainer.Resolve("test_key")
 	if !found {
 		t.Fatal("Should find registered value using old get method")
 	}
@@ -92,14 +92,14 @@ func TestContainerBackwardCompatibility(t *testing.T) {
 	}
 
 	// Test getAll method
-	all := concreteContainer.getAll()
+	all := concreteContainer.ListAll()
 	if len(all) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(all))
 	}
 
 	// Test len method
-	if concreteContainer.len() != 1 {
-		t.Errorf("Expected length 1, got %d", concreteContainer.len())
+	if concreteContainer.Count() != 1 {
+		t.Errorf("Expected length 1, got %d", concreteContainer.Count())
 	}
 }
 

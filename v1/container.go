@@ -24,23 +24,6 @@ func NewContainer() ServiceContainer {
 	return &serviceRegistry{}
 }
 
-// Backward compatibility: alias methods for the old interface
-func (sr *serviceRegistry) set(key string, instance any) {
-	sr.Register(key, instance)
-}
-
-func (sr *serviceRegistry) get(key string) (any, bool) {
-	return sr.Resolve(key)
-}
-
-func (sr *serviceRegistry) getAll() []any {
-	return sr.ListAll()
-}
-
-func (sr *serviceRegistry) len() int {
-	return sr.Count()
-}
-
 // Register stores a service instance in the container under the given key.
 func (sr *serviceRegistry) Register(serviceKey string, serviceInstance any) {
 	sr.services.Store(text.Sanitize(serviceKey), serviceInstance)
