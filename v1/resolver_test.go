@@ -78,28 +78,28 @@ func TestContainerBackwardCompatibility(t *testing.T) {
 	// Cast to concrete type to access backward compatibility methods
 	concreteContainer := container.(*serviceRegistry)
 
-	// Test old Set method
-	concreteContainer.Set("test_key", testValue)
+	// Test old set method
+	concreteContainer.set("test_key", testValue)
 
-	// Test old Get method
-	resolved, found := concreteContainer.Get("test_key")
+	// Test old get method
+	resolved, found := concreteContainer.get("test_key")
 	if !found {
-		t.Fatal("Should find registered value using old Get method")
+		t.Fatal("Should find registered value using old get method")
 	}
 
 	if resolved != testValue {
 		t.Errorf("Expected %v, got %v", testValue, resolved)
 	}
 
-	// Test GetAll method
-	all := concreteContainer.GetAll()
+	// Test getAll method
+	all := concreteContainer.getAll()
 	if len(all) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(all))
 	}
 
-	// Test Len method
-	if concreteContainer.Len() != 1 {
-		t.Errorf("Expected length 1, got %d", concreteContainer.Len())
+	// Test len method
+	if concreteContainer.len() != 1 {
+		t.Errorf("Expected length 1, got %d", concreteContainer.len())
 	}
 }
 
@@ -113,7 +113,7 @@ func TestNewServiceWrapper(t *testing.T) {
 
 // TestNewInjectorBackwardCompatibility tests backward compatibility
 func TestNewInjectorBackwardCompatibility(t *testing.T) {
-	wrapper := NewInjector[string]()
+	wrapper := NewServiceWrapper[string]()
 	if wrapper == nil {
 		t.Fatal("NewInjector should not return nil")
 	}
@@ -140,17 +140,17 @@ func TestServiceWrapperBackwardCompatibilityMethods(t *testing.T) {
 	// Cast to concrete type to access backward compatibility methods
 	concreteWrapper := wrapper.(*serviceWrapper[string])
 
-	// Test AddInstance (old method)
-	concreteWrapper.AddInstance(testValue)
+	// Test addInstance (old method)
+	concreteWrapper.addInstance(testValue)
 
-	// Test GetInstance (old method)
-	retrieved := concreteWrapper.GetInstance()
+	// Test getInstance (old method)
+	retrieved := concreteWrapper.getInstance()
 	if retrieved != testValue {
 		t.Errorf("Expected %v, got %v", testValue, retrieved)
 	}
 
-	// Test GetNewInstance (old method)
-	newInstance := concreteWrapper.GetNewInstance()
+	// Test getNewInstance (old method)
+	newInstance := concreteWrapper.getNewInstance()
 	if newInstance != testValue {
 		t.Errorf("Expected %v, got %v", testValue, newInstance)
 	}
@@ -174,9 +174,9 @@ func TestRegisterServiceAndResolveService(t *testing.T) {
 	container := NewContainer()
 	testStruct := &TestStruct{Value: "test"}
 
-	RegisterService(testStruct, container)
+	Inject(testStruct, container)
 
-	retrieved := ResolveService[*TestStruct](container)
+	retrieved := Get[*TestStruct](container)
 	if retrieved.Value != "test" {
 		t.Errorf("Expected 'test', got %v", retrieved.Value)
 	}
@@ -235,7 +235,7 @@ func TestGetFunctionName(t *testing.T) {
 // TestExtractFunctionName tests new function name
 func TestExtractFunctionName(t *testing.T) {
 	testFunc := func() {}
-	name := ExtractFunctionName(testFunc)
+	name := GetFunctionName(testFunc)
 
 	// Should be the same as GetFunctionName
 	expectedName := GetFunctionName(testFunc)
@@ -290,7 +290,7 @@ func TestInitializeServices(t *testing.T) {
 	testStruct := &TestStruct{Value: "test"}
 
 	Inject(testStruct, container)
-	InitializeServices(container)
+	Init(container)
 
 	retrieved := Get[*TestStruct](container)
 	if !retrieved.initialized {
@@ -312,7 +312,7 @@ func TestServiceWrapperNameMatching(t *testing.T) {
 
 	// Test backward compatibility MatchWithName
 	concreteWrapper := wrapper.(*serviceWrapper[string])
-	if !concreteWrapper.MatchWithName(reflect.TypeOf(testValue).String()) {
+	if !concreteWrapper.matchWithName(reflect.TypeOf(testValue).String()) {
 		t.Error("Should match with old method name")
 	}
 }

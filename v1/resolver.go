@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// NewInjector creates a new service wrapper (backward compatibility).
-func NewInjector[T any]() ServiceWrapper[T] {
+// newInjector creates a new service wrapper (backward compatibility).
+func newInjector[T any]() ServiceWrapper[T] {
 	return NewServiceWrapper[T]()
 }
 
@@ -71,8 +71,8 @@ func Get[T any](serviceContainer ServiceContainer) T {
 	return emptyService
 }
 
-// ResolveService is an alias for Get for more descriptive naming.
-func ResolveService[T any](serviceContainer ServiceContainer) T {
+// resolveService is an alias for Get for more descriptive naming.
+func resolveService[T any](serviceContainer ServiceContainer) T {
 	return Get[T](serviceContainer)
 }
 
@@ -83,8 +83,8 @@ func Inject(serviceInstance any, serviceContainer ServiceContainer) {
 	serviceContainer.Register(reflect.TypeOf(serviceInstance).String(), wrapper)
 }
 
-// RegisterService is an alias for Inject for more descriptive naming.
-func RegisterService(serviceInstance any, serviceContainer ServiceContainer) {
+// registerService is an alias for Inject for more descriptive naming.
+func registerService(serviceInstance any, serviceContainer ServiceContainer) {
 	Inject(serviceInstance, serviceContainer)
 }
 
@@ -96,8 +96,8 @@ func GetFunctionName(functionValue interface{}) string {
 	return nameParts[len(nameParts)-1]
 }
 
-// ExtractFunctionName is an alias for GetFunctionName for more descriptive naming.
-func ExtractFunctionName(functionValue interface{}) string {
+// extractFunctionName is an alias for GetFunctionName for more descriptive naming.
+func extractFunctionName(functionValue interface{}) string {
 	return GetFunctionName(functionValue)
 }
 
@@ -135,7 +135,7 @@ func Init(serviceContainer ServiceContainer) {
 	}
 }
 
-// InitializeServices is an alias for Init for more descriptive naming.
-func InitializeServices(serviceContainer ServiceContainer) {
+// initializeServices is an alias for Init for more descriptive naming.
+func initializeServices(serviceContainer ServiceContainer) {
 	Init(serviceContainer)
 }

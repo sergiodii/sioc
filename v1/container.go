@@ -25,19 +25,19 @@ func NewContainer() ServiceContainer {
 }
 
 // Backward compatibility: alias methods for the old interface
-func (sr *serviceRegistry) Set(key string, instance any) {
+func (sr *serviceRegistry) set(key string, instance any) {
 	sr.Register(key, instance)
 }
 
-func (sr *serviceRegistry) Get(key string) (any, bool) {
+func (sr *serviceRegistry) get(key string) (any, bool) {
 	return sr.Resolve(key)
 }
 
-func (sr *serviceRegistry) GetAll() []any {
+func (sr *serviceRegistry) getAll() []any {
 	return sr.ListAll()
 }
 
-func (sr *serviceRegistry) Len() int {
+func (sr *serviceRegistry) len() int {
 	return sr.Count()
 }
 

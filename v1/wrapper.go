@@ -24,8 +24,8 @@ func (sw *serviceWrapper[T]) SetService(serviceInstance T) ServiceWrapper[T] {
 	return sw
 }
 
-// Backward compatibility: AddInstance is an alias for SetService.
-func (sw *serviceWrapper[T]) AddInstance(instance T) ServiceWrapper[T] {
+// Backward compatibility: addInstance is an alias for SetService.
+func (sw *serviceWrapper[T]) addInstance(instance T) ServiceWrapper[T] {
 	return sw.SetService(instance)
 }
 
@@ -34,8 +34,8 @@ func (sw *serviceWrapper[T]) GetService() T {
 	return sw.serviceInstance
 }
 
-// Backward compatibility: GetInstance is an alias for GetService.
-func (sw *serviceWrapper[T]) GetInstance() T {
+// Backward compatibility: getInstance is an alias for GetService.
+func (sw *serviceWrapper[T]) getInstance() T {
 	return sw.GetService()
 }
 
@@ -46,8 +46,8 @@ func (sw *serviceWrapper[T]) CreateNewService() T {
 	return *newService
 }
 
-// Backward compatibility: GetNewInstance is an alias for CreateNewService.
-func (sw *serviceWrapper[T]) GetNewInstance() T {
+// Backward compatibility: getNewInstance is an alias for CreateNewService.
+func (sw *serviceWrapper[T]) getNewInstance() T {
 	return sw.CreateNewService()
 }
 
@@ -56,8 +56,8 @@ func (sw *serviceWrapper[T]) MatchesServiceName(serviceName string) bool {
 	return sw.serviceName == sw.sanitizeServiceName(serviceName)
 }
 
-// Backward compatibility: MatchWithName is an alias for MatchesServiceName.
-func (sw *serviceWrapper[T]) MatchWithName(name string) bool {
+// Backward compatibility: matchWithName is an alias for MatchesServiceName.
+func (sw *serviceWrapper[T]) matchWithName(name string) bool {
 	return sw.MatchesServiceName(name)
 }
 

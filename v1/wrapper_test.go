@@ -81,27 +81,27 @@ func TestServiceWrapperBackwardCompatibilityMethodsDetailed(t *testing.T) {
 	concreteWrapper := wrapper.(*serviceWrapper[string])
 	testService := "test_service"
 
-	// Test AddInstance (backward compatibility)
-	result := concreteWrapper.AddInstance(testService)
+	// Test addInstance (backward compatibility)
+	result := concreteWrapper.addInstance(testService)
 	if result != wrapper {
-		t.Error("AddInstance should return the same wrapper")
+		t.Error("addInstance should return the same wrapper")
 	}
 
-	// Test GetInstance (backward compatibility)
-	retrieved := concreteWrapper.GetInstance()
+	// Test getInstance (backward compatibility)
+	retrieved := concreteWrapper.getInstance()
 	if retrieved != testService {
 		t.Errorf("Expected %v, got %v", testService, retrieved)
 	}
 
-	// Test GetNewInstance (backward compatibility)
-	newInstance := concreteWrapper.GetNewInstance()
+	// Test getNewInstance (backward compatibility)
+	newInstance := concreteWrapper.getNewInstance()
 	if newInstance != testService {
 		t.Errorf("Expected %v, got %v", testService, newInstance)
 	}
 
-	// Test MatchWithName (backward compatibility)
+	// Test matchWithName (backward compatibility)
 	typeName := reflect.TypeOf(testService).String()
-	if !concreteWrapper.MatchWithName(typeName) {
+	if !concreteWrapper.matchWithName(typeName) {
 		t.Error("Should match with old method name")
 	}
 }

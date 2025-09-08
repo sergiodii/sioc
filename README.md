@@ -1,145 +1,161 @@
 # sIOC - Simple Inversion of Control
 
-sIOC is a Go library that provides a simple dependency injection system.
+sIOC is a Go library that provides a simple dependency injection system for Go applications.
 
+## Versões Disponíveis
 
-## Atual Version
+### v1 (Recomendada) 🚀
+A versão mais recente com API moderna, containers isolados e thread-safety.
 
-*package v0*
+- **Documentação**: [v1.md](./doc/v1.md)
+- **Características**: Containers isolados, thread-safe, generics, API limpa
+- **Uso**: `import "github.com/sergiodii/sioc/v1"`
+
+### v0 (Legacy)
+Versão inicial com padrão singleton global.
+
+- **Documentação**: [v0.md](./doc/v0.md)
+- **Características**: Singleton global, API simples
+- **Uso**: `import "github.com/sergiodii/sioc/v0"`
+
+## Quick Start (v1)
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/sergiodii/sioc/v1"
+)
+
+type UserService struct {
+    Name string
+}
+
+func main() {
+    // Cria um container
+    container := sioc.NewContainer()
+    
+    // Registra um serviço
+    sioc.Inject(&UserService{Name: "admin"}, container)
+    
+    // Resolve o serviço
+    service := sioc.Get[*UserService](container)
+    fmt.Println(service.Name) // Output: admin
+}
+```
 
 ## Installation
 
 ```bash
-go get github.com/sergiodii/sioc
+# Para v1 (recomendada)
+go get github.com/sergiodii/sioc/v1
+
+# Para v0 (legacy)
+go get github.com/sergiodii/sioc/v0
 ```
 
-## Usage 
+## Documentação Completa
 
-### Registering an instance and getting an instance
+- **[v1 - Documentação Completa](./doc/v1.md)** - Versão recomendada com containers isolados
+- **[v0 - Documentação Completa](./doc/v0.md)** - Versão legacy com singleton global
 
+## Exemplos Básicos
 
-You can register any instance of any type, but it must be a pointer.
-register the instance using the Register function.
-
-```go
-sioc.Register(instance)
-```
-
-After registering the instance, you can get the instance using the Get function.
+### v1 - Exemplo com Inicialização
 
 ```go
-result := sioc.Get[T]()
-```
+package main
 
-You should pass the type of the instance to the Get function. You can pass a interface or a struct.
+import (
+    "fmt"
+    "github.com/sergiodii/sioc/v1"
+)
 
-```go
-import "github.com/sergiodii/sioc"
-
-
-type Service struct {
+type Database struct {
+    Connected bool
 }
 
-func (s *Service) DoSomething() {
-	fmt.Println("Doing something")
+func (d *Database) Init() {
+    d.Connected = true
+}
+
+type UserService struct {
+    db *Database
+}
+
+func (u *UserService) Init(db *Database) {
+    u.db = db
 }
 
 func main() {
-	sioc.Register(&Service{})
-	executeService()
+    container := sioc.NewContainer()
+    
+    // Registra as dependências
+    sioc.Inject(&Database{}, container)
+    sioc.Inject(&UserService{}, container)
+    
+    // Inicializa todas as dependências
+    sioc.Init(container)
+    
+    // Resolve o serviço
+    userService := sioc.Get[*UserService](container)
+    fmt.Printf("Database connected: %v\n", userService.db.Connected)
 }
-
-// executeService is a function that executes the service.
-// call service in any part of your code
-func executeService() {
-
-    // Get the service instance, pass the type of the instance
-	service := sioc.Get[Service]()
-	service.DoSomething()
-}
-
 ```
 
-### Initializing as a constructor
-
-As we all know, there is no constructor in Go, but we can simulate the behavior of a constructor that automatically injects the dependencies that are in the parameter of this function.
-
-I present the "Constructor", Init.
+### v0 - Exemplo Básico
 
 ```go
-sioc.Init()
-```
+package main
 
-Every structure you create and have a function that has the name Init, it will be executed when you call the Init of the sIOC.
-
-```go
-
-import "github.com/sergiodii/sioc"
+import (
+    "fmt"
+    "github.com/sergiodii/sioc/v0"
+)
 
 type Service struct {
+    Name string
 }
 
 func (s *Service) Init() {
-	fmt.Println("Service initialized")
+    fmt.Println("Service initialized")
 }
 
 func main() {
-	sioc.Register(&Service{})
-	sioc.Init()
-    // "Service initialized" will be printed
+    sioc.Start()
+    sioc.Register(&Service{Name: "test"})
+    sioc.Init()
+    
+    service := sioc.Get[*Service]()
+    fmt.Println(service.Name)
 }
 ```
 
-With this, you can create a structure and inject the dependencies you need in the constructor of the structure.
+## Características Principais
 
-```go
-type Service struct {
-    db *sql.DB
-}
+### v1 (Recomendada)
+- ✅ **Containers Isolados**: Múltiplos contextos independentes
+- ✅ **Thread Safety**: Operações concorrentes seguras
+- ✅ **Generics**: Suporte completo a tipos genéricos
+- ✅ **API Limpa**: Interface moderna e intuitiva
+- ✅ **Testabilidade**: Fácil criação de containers para testes
+- ✅ **Sanitização**: Nomes de serviços automaticamente limpos
 
-func (s *Service) Init() {
-    s.db = sql.NewDB()
-}
-```
+### v0 (Legacy)
+- ⚠️ **Singleton Global**: Todas as dependências gerenciadas globalmente
+- ⚠️ **API Simples**: Interface básica e direta
+- ⚠️ **Compatibilidade**: Mantida para projetos existentes
 
-Inject the dependency in the constructor of the structure.
+## Migração
 
-you can create a function Init and inject the dependencies inside it, through the parameter of this function.
-
-```go
-type Service struct {
-    db *sql.DB
-}
-
-func (s *Service) Init(db *sql.DB) {
-    s.db = db
-}
-```
-
-Ready! Now you can use the Service structure and the db dependency injected in the constructor.
-
-```go
-import "github.com/sergiodii/sioc"
-
-type Service struct {
-    db *sql.DB
-}
-
-func (s *Service) Init(db *sql.DB) {
-    s.db = db
-}
+Para migrar da v0 para v1, consulte o guia de migração na [documentação da v1](./doc/v1.md#migração-da-v0).
 
 
-func main() {
-	sioc.Register(&Service{})
-	sioc.Register(&sql.DB{})
-	sioc.Init()
+## Contribuição
 
-    // the sIOC will inject the db dependency in the constructor of the Service structure
-}
-```
+Contribuições são bem-vindas! Por favor, abra uma issue ou pull request.
 
-The order of registration does not matter, as the sIOC will call the dependencies in order, that is, if you register a dependency after registering the structure that depends on it, the sIOC will still find the dependency and inject it into the structure correctly.
+## Licença
 
-
-license MIT
+MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
