@@ -6,43 +6,67 @@ import (
 	"github.com/sergiodii/sioc/extension/text"
 )
 
-type Container interface {
-	Set(instanceType string, instance any)
-	Get(interfaceType string) (any, bool)
-	GetAll() []any
-	Len() int
+// ServiceContainer defines the interface for a dependency injection container.
+type ServiceContainer interface {
+	Register(serviceKey string, serviceInstance any)
+	Resolve(serviceKey string) (any, bool)
+	ListAll() []any
+	Count() int
 }
 
-type container struct {
-	mapList sync.Map
+// serviceRegistry implements the ServiceContainer interface using sync.Map for concurrency safety.
+type serviceRegistry struct {
+	services sync.Map
 }
 
-func New() Container {
-	return &container{}
+// NewContainer creates a new, empty service container instance.
+func NewContainer() ServiceContainer {
+	return &serviceRegistry{}
 }
 
-func (c *container) Set(instanceType string, instance any) {
-	c.mapList.Store(text.Sanitize(instanceType), instance)
+// Backward compatibility: alias methods for the old interface
+func (sr *serviceRegistry) Set(key string, instance any) {
+	sr.Register(key, instance)
 }
 
-func (c *container) Get(instanceType string) (any, bool) {
-	return c.mapList.Load(text.Sanitize(instanceType))
+func (sr *serviceRegistry) Get(key string) (any, bool) {
+	return sr.Resolve(key)
 }
 
-func (c *container) GetAll() []any {
-	var list []any
-	c.mapList.Range(func(key, value any) bool {
-		list = append(list, value)
+func (sr *serviceRegistry) GetAll() []any {
+	return sr.ListAll()
+}
+
+func (sr *serviceRegistry) Len() int {
+	return sr.Count()
+}
+
+// Register stores a service instance in the container under the given key.
+func (sr *serviceRegistry) Register(serviceKey string, serviceInstance any) {
+	sr.services.Store(text.Sanitize(serviceKey), serviceInstance)
+}
+
+// Resolve retrieves a service instance by key. Returns (nil, false) if not found.
+func (sr *serviceRegistry) Resolve(serviceKey string) (any, bool) {
+	return sr.services.Load(text.Sanitize(serviceKey))
+}
+
+// ListAll returns a slice of all registered service instances.
+func (sr *serviceRegistry) ListAll() []any {
+	var serviceList []any
+	sr.services.Range(func(_, serviceInstance any) bool {
+		serviceList = append(serviceList, serviceInstance)
 		return true
 	})
-	return list
+	return serviceList
 }
 
-func (c *container) Len() int {
-	var count int
-	c.mapList.Range(func(key, value any) bool {
-		count++
+// Count returns the number of registered service instances.
+func (sr *serviceRegistry) Count() int {
+	serviceCount := 0
+	sr.services.Range(func(_, _ any) bool {
+		serviceCount++
 		return true
 	})
-	return count
+	return serviceCount
 }
