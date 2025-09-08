@@ -25,19 +25,42 @@ func Get[T any](serviceContainer ServiceContainer) T {
 		if wrapperPtr, ok := serviceInstance.(ServiceWrapper[*T]); ok {
 			return *wrapperPtr.GetService()
 		}
+		// Also try ServiceWrapper[any] for backward compatibility
+		if wrapperAny, ok := serviceInstance.(ServiceWrapper[any]); ok {
+			service := wrapperAny.GetService()
+			if typedService, ok := service.(T); ok {
+				return typedService
+			}
+		}
 	}
 
 	// Try to find by interface implementation or pointer match
 	for _, registeredService := range serviceContainer.ListAll() {
+		// Try ServiceWrapper[any] first (most common case)
+		if wrapperAny, ok := registeredService.(ServiceWrapper[any]); ok {
+			serviceInstance := wrapperAny.GetService()
+			// Check direct type match
+			if typedService, ok := serviceInstance.(T); ok {
+				return typedService
+			}
+			// Check interface implementation
+			if targetType.Kind() == reflect.Interface && reflect.TypeOf(serviceInstance).Implements(targetType) {
+				if typedService, ok := serviceInstance.(T); ok {
+					return typedService
+				}
+			}
+		}
+
+		// Try specific type wrappers
 		if wrapper, ok := registeredService.(ServiceWrapper[T]); ok {
 			serviceInstance := wrapper.GetService()
-			if reflect.TypeOf(serviceInstance).Implements(targetType) {
+			if targetType.Kind() == reflect.Interface && reflect.TypeOf(serviceInstance).Implements(targetType) {
 				return serviceInstance
 			}
 		}
 		if wrapperPtr, ok := registeredService.(ServiceWrapper[*T]); ok {
 			serviceInstance := wrapperPtr.GetService()
-			if reflect.TypeOf(serviceInstance).Implements(targetType) {
+			if targetType.Kind() == reflect.Interface && reflect.TypeOf(serviceInstance).Implements(targetType) {
 				return *serviceInstance
 			}
 		}
